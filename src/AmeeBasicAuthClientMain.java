@@ -23,10 +23,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 public class AmeeBasicAuthClientMain {
-	
+
 	private static String TARGET_HOST = "stage.amee.com";
 	private static int TARGET_PORT = 443;
-	
+
 	public static void main(String[] args) {
 		
 		if (args.length < 2) {
@@ -38,34 +38,34 @@ public class AmeeBasicAuthClientMain {
 		String password = args[1];
 		
 		DefaultHttpClient httpClient = new DefaultHttpClient();
-
+		
 		AuthScope authScope = new AuthScope(TARGET_HOST, TARGET_PORT);
 		Credentials credentials = new UsernamePasswordCredentials(username, password);
 		
 		httpClient.getCredentialsProvider().setCredentials(authScope, credentials);
-
+		
 		HttpContext localContext = new BasicHttpContext();
 		BasicScheme basicScheme = new BasicScheme();
 		localContext.setAttribute("preemptive-auth", basicScheme);
 		httpClient.addRequestInterceptor(new PreemptiveAuth(), 0);
 		
 		HttpHost targetHost = new HttpHost(TARGET_HOST, TARGET_PORT, "https");
-
-        System.out.println("----------------------------------------");
-
+		
+		System.out.println("----------------------------------------");
+		
 		HttpGet httpget = new HttpGet("/profiles");
 		httpget.addHeader("Accept", "application/xml");
 		
-        System.out.println("executing request: " + httpget.getRequestLine());
-        System.out.println("to target: " + targetHost);
+		System.out.println("executing request: " + httpget.getRequestLine());
+		System.out.println("to target: " + targetHost);
 		
 		try {
 			HttpResponse res = httpClient.execute(targetHost, httpget, localContext);
 			HttpEntity entity = res.getEntity();
 			
-            System.out.println("----------------------------------------");
-            System.out.println(res.getStatusLine());
-
+			System.out.println("----------------------------------------");
+			System.out.println(res.getStatusLine());
+			
 			if (entity != null) {
 				System.out.println("Response content length: " + entity.getContentLength());
 				System.out.println(EntityUtils.toString(entity));
@@ -80,34 +80,34 @@ public class AmeeBasicAuthClientMain {
 	}
 	
 	// http://svn.apache.org/repos/asf/httpcomponents/httpclient/tags/4.0.1/httpclient/src/examples/org/apache/http/examples/client/ClientPreemptiveBasicAuthentication.java
-    static class PreemptiveAuth implements HttpRequestInterceptor {
-
-        public void process(
-                final HttpRequest request, 
-                final HttpContext context) throws HttpException, IOException {
-            
-            AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
-            
-            // If no auth scheme avaialble yet, try to initialize it preemptively
-            if (authState.getAuthScheme() == null) {
-            	
-                AuthScheme authScheme = (AuthScheme) context.getAttribute("preemptive-auth");
-                CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
-                HttpHost targetHost = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
-                
-                if (authScheme != null) {
-                    
-                	Credentials creds = credsProvider.getCredentials(
-                            new AuthScope(targetHost.getHostName(), targetHost.getPort()));
-                    
-                    if (creds == null) {
-                        throw new HttpException("No credentials for preemptive authentication");
-                    }
-                    
-                    authState.setAuthScheme(authScheme);
-                    authState.setCredentials(creds);
-                }
-            }
-        }
-    }
+	static class PreemptiveAuth implements HttpRequestInterceptor {
+		
+		public void process(
+				final HttpRequest request, 
+				final HttpContext context) throws HttpException, IOException {
+			
+			AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
+			
+			// If no auth scheme avaialble yet, try to initialize it preemptively
+			if (authState.getAuthScheme() == null) {
+				
+				AuthScheme authScheme = (AuthScheme) context.getAttribute("preemptive-auth");
+				CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
+				HttpHost targetHost = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+				
+				if (authScheme != null) {
+					
+					Credentials creds = credsProvider.getCredentials(
+							new AuthScope(targetHost.getHostName(), targetHost.getPort()));
+					
+					if (creds == null) {
+						throw new HttpException("No credentials for preemptive authentication");
+					}
+					
+					authState.setAuthScheme(authScheme);
+					authState.setCredentials(creds);
+				}
+			}
+		}
+	}
 }

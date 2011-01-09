@@ -16,7 +16,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 public class AmeeCookieAuthClientMain {
-	
+
 	private static String TARGET_HOST = "stage.amee.com";
 	private static int TARGET_PORT = 443;
 
@@ -32,15 +32,15 @@ public class AmeeCookieAuthClientMain {
 		
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpHost targetHost = new HttpHost(TARGET_HOST, TARGET_PORT, "https");
-
+		
 		String cookie = getCookie(httpClient, targetHost, username, password);
 		
-        if (cookie == null) return;
-
-        System.out.println("----------------------------------------");
-
-        HttpGet httpget = new HttpGet("/profiles");
-        httpget.addHeader("Cookie", cookie);
+		if (cookie == null) return;
+		
+		System.out.println("----------------------------------------");
+		
+		HttpGet httpget = new HttpGet("/profiles");
+		httpget.addHeader("Cookie", cookie);
 		httpget.addHeader("Accept", "application/xml");
 		
 		System.out.println("executing request: " + httpget.getRequestLine());
@@ -49,21 +49,22 @@ public class AmeeCookieAuthClientMain {
 		HttpResponse res = httpClient.execute(targetHost, httpget);
 		HttpEntity entity = res.getEntity();
 		
-        System.out.println("----------------------------------------");
-        System.out.println(res.getStatusLine());
-        
-        if (entity != null) {
-        	
-        	System.out.println(EntityUtils.toString(entity));
-        }
-        
+		System.out.println("----------------------------------------");
+		System.out.println(res.getStatusLine());
+		
+		if (entity != null) {
+			
+			System.out.println(EntityUtils.toString(entity));
+		}
+		
 		httpClient.getConnectionManager().shutdown();
 	}
 	
 	private static String getCookie(HttpClient httpClient, HttpHost targetHost, String username, String password) throws Exception {
 		
-        System.out.println("----------------------------------------");
-
+		System.out.println("----------------------------------------");
+		
+		String cookie = "";
 		HttpPost httppost = new HttpPost("/auth");
 		httppost.addHeader("Accept", "application/xml");
 		httppost.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -73,17 +74,16 @@ public class AmeeCookieAuthClientMain {
 		params.add(new BasicNameValuePair("password", password));
 		httppost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
 		
-        System.out.println("executing request: " + httppost.getRequestLine());
-        System.out.println("to target: " + targetHost);
+		System.out.println("executing request: " + httppost.getRequestLine());
+		System.out.println("to target: " + targetHost);
 		
 		HttpResponse res = httpClient.execute(targetHost, httppost);
 		HttpEntity entity = res.getEntity();
 		
-        System.out.println("----------------------------------------");
-        System.out.println(res.getStatusLine());
-        
-        String cookie = "";
-
+		System.out.println("----------------------------------------");
+		System.out.println(res.getStatusLine());
+		
+		
 		if (entity != null) {
 			
 			Header[] headers = res.getHeaders("authToken");
