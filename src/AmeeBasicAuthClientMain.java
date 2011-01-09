@@ -11,7 +11,6 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.ClientContext;
@@ -27,7 +26,7 @@ public class AmeeBasicAuthClientMain {
 	private static String TARGET_HOST = "stage.amee.com";
 	private static int TARGET_PORT = 443;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		
 		if (args.length < 2) {
 			System.out.println("required arguments: AMEE_API_USERNAME AMEE_API_PASSWORD");
@@ -59,21 +58,15 @@ public class AmeeBasicAuthClientMain {
 		System.out.println("executing request: " + httpget.getRequestLine());
 		System.out.println("to target: " + targetHost);
 		
-		try {
-			HttpResponse res = httpClient.execute(targetHost, httpget, localContext);
-			HttpEntity entity = res.getEntity();
-			
-			System.out.println("----------------------------------------");
-			System.out.println(res.getStatusLine());
-			
-			if (entity != null) {
-				System.out.println("Response content length: " + entity.getContentLength());
-				System.out.println(EntityUtils.toString(entity));
-			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		HttpResponse res = httpClient.execute(targetHost, httpget, localContext);
+		HttpEntity entity = res.getEntity();
+		
+		System.out.println("----------------------------------------");
+		System.out.println(res.getStatusLine());
+		
+		if (entity != null) {
+			System.out.println("Response content length: " + entity.getContentLength());
+			System.out.println(EntityUtils.toString(entity));
 		}
 		
 		httpClient.getConnectionManager().shutdown();

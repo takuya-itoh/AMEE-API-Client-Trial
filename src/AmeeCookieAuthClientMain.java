@@ -5,6 +5,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -33,14 +34,11 @@ public class AmeeCookieAuthClientMain {
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpHost targetHost = new HttpHost(TARGET_HOST, TARGET_PORT, "https");
 		
-		String cookie = getCookie(httpClient, targetHost, username, password);
-		
-		if (cookie == null) return;
+		getCookie(httpClient, targetHost, username, password);
 		
 		System.out.println("----------------------------------------");
 		
 		HttpGet httpget = new HttpGet("/profiles");
-		httpget.addHeader("Cookie", cookie);
 		httpget.addHeader("Accept", "application/xml");
 		
 		System.out.println("executing request: " + httpget.getRequestLine());
@@ -52,19 +50,22 @@ public class AmeeCookieAuthClientMain {
 		System.out.println("----------------------------------------");
 		System.out.println(res.getStatusLine());
 		
+		if (res.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+			System.out.println("unauthorized");
+			return;
+		}
+		
 		if (entity != null) {
-			
 			System.out.println(EntityUtils.toString(entity));
 		}
 		
 		httpClient.getConnectionManager().shutdown();
 	}
 	
-	private static String getCookie(HttpClient httpClient, HttpHost targetHost, String username, String password) throws Exception {
+	private static void getCookie(HttpClient httpClient, HttpHost targetHost, String username, String password) throws Exception {
 		
 		System.out.println("----------------------------------------");
 		
-		String cookie = "";
 		HttpPost httppost = new HttpPost("/auth");
 		httppost.addHeader("Accept", "application/xml");
 		httppost.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -83,20 +84,16 @@ public class AmeeCookieAuthClientMain {
 		System.out.println("----------------------------------------");
 		System.out.println(res.getStatusLine());
 		
-		
 		if (entity != null) {
 			
 			Header[] headers = res.getHeaders("authToken");
 			
 			if (headers.length > 0) {
 				Header authTokenHeader = headers[0];
-				cookie = authTokenHeader.getValue();
 				System.out.println(authTokenHeader.getValue());
 			}
 			
 			System.out.println(EntityUtils.toString(entity));
 		}
-		
-		return cookie;
 	}
 }
