@@ -34,7 +34,23 @@ public class AmeeCookieAuthClientMain {
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpHost targetHost = new HttpHost(TARGET_HOST, TARGET_PORT, "https");
 		
-		getCookie(httpClient, targetHost, username, password);
+		int unauthorizedCount = 0;
+		
+		do {
+			
+			if (doRequest(httpClient, targetHost)) {
+				break;
+			}
+			
+			unauthorizedCount++;
+			authorize(httpClient, targetHost, username, password);
+			
+		} while (unauthorizedCount < 3);
+		
+		httpClient.getConnectionManager().shutdown();
+	}
+	
+	private static boolean doRequest(HttpClient httpClient, HttpHost targetHost) throws Exception {
 		
 		System.out.println("----------------------------------------");
 		
@@ -51,18 +67,18 @@ public class AmeeCookieAuthClientMain {
 		System.out.println(res.getStatusLine());
 		
 		if (res.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-			System.out.println("unauthorized");
-			return;
+			httpget.abort();
+			return false;
 		}
 		
 		if (entity != null) {
 			System.out.println(EntityUtils.toString(entity));
 		}
 		
-		httpClient.getConnectionManager().shutdown();
+		return true;
 	}
 	
-	private static void getCookie(HttpClient httpClient, HttpHost targetHost, String username, String password) throws Exception {
+	private static void authorize(HttpClient httpClient, HttpHost targetHost, String username, String password) throws Exception {
 		
 		System.out.println("----------------------------------------");
 		
