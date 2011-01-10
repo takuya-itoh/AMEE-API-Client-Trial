@@ -14,7 +14,6 @@ public class AmeeClientTrialMain {
 	 *   commons-httpclient 3.1
 	 *   commons-logging 1.1
 	 *   json 2.0
-	 * 
 	 */
 	public static void main(String[] args) throws AmeeException {
 		
@@ -25,7 +24,7 @@ public class AmeeClientTrialMain {
 		
 		AmeeContext.getInstance().setUsername(args[0]);
 		AmeeContext.getInstance().setPassword(args[1]);
-		AmeeContext.getInstance().setBaseUrl("http://stage.amee.com");
+		AmeeContext.getInstance().setBaseUrl("https://stage.amee.com");
 		AmeeContext.getInstance().setItemsPerPage(10);
 		
 		String profileUID = args[2];
